@@ -15,9 +15,20 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Attributes as OA;
 
 class LanguageController extends AbstractController
 {
+    #[OA\Response(
+        response: 200,
+        description: 'Cette méthode permet de récupérer les langues',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Language::class))
+        )
+    )]
+    #[OA\Tag(name: 'Language')]
     #[Route('/api/language', name: 'app_language', methods: ['GET'])]
     public function getLanguage(LanguageRepository $languageRepository, SerializerInterface $serializer): JsonResponse
     {
@@ -26,6 +37,15 @@ class LanguageController extends AbstractController
         return new JsonResponse($jsonLanguage, Response::HTTP_OK,[], true);
     }
 
+    #[OA\Response(
+        response: 200,
+        description: 'Cette méthode permet de récupérer un langage',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Language::class, groups: ['getLanguage']))
+        )
+    )]
+    #[OA\Tag(name: 'Language')]
     #[Route('/api/language/{id}', name: 'detailLanguage', methods: ['GET'])]
     public function getDetailLanguage(SerializerInterface $serializer, Language $language): JsonResponse
     {
@@ -33,6 +53,16 @@ class LanguageController extends AbstractController
             return new JsonResponse($jsonLanguage, Response::HTTP_OK, ['accept' => 'json'], true);
     }
 
+
+    #[OA\Response(
+        response: 200,
+        description: 'Cette méthode permet de créer un language',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Language::class))
+        )
+    )]
+    #[OA\Tag(name: 'Language')]
     #[Route('/api/language', name:'createLanguage', methods: ['POST'])]
         public function createLanguage(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator): JsonResponse
         {
@@ -49,6 +79,16 @@ class LanguageController extends AbstractController
             return new JsonResponse($jsonLanguage, Response::HTTP_CREATED, ["Location" => $location], true);
         }
 
+
+        #[OA\Response(
+            response: 200,
+            description: 'Cette méthode permet de modifier une langue',
+            content: new OA\JsonContent(
+                type: 'array',
+                items: new OA\Items(ref: new Model(type: Language::class))
+            )
+        )]
+        #[OA\Tag(name: 'Language')]
     #[Route('/api/language/{id}', name: 'updateLanguage', methods: ['PUT'])]
         public function updateLanguage(Request $request, SerializerInterface $serializer, Language $currentLanguage, EntityManagerInterface $em): JsonResponse
         {
@@ -62,6 +102,16 @@ class LanguageController extends AbstractController
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         }
 
+
+        #[OA\Response(
+            response: 200,
+            description: 'Cette méthode permet de supprimer une langue',
+            content: new OA\JsonContent(
+                type: 'array',
+                items: new OA\Items(ref: new Model(type: Language::class, groups: ['getLanguage']))
+            )
+        )]
+        #[OA\Tag(name: 'Language')]
     #[Route('/api/language/{id}', name: 'deleteLanguage', methods: ['DELETE'])]
     public function deleteLAnguage(Language $language, EntityManagerInterface $em): JsonResponse
     {
