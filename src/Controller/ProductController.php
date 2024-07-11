@@ -61,16 +61,34 @@ class ProductController extends AbstractController
     }
 
 
-    #[OA\Response(
-        response: 200,
-        description: 'Cette méthode permet de créer un produit',
-        content: new OA\JsonContent(
-            type: 'array',
-            items: new OA\Items(ref: new Model(type: Product::class))
-        )
-    )]
-    #[OA\Tag(name: 'Product')]
+
     #[Route('/api/product', name:'createProduct', methods: ['POST'])]
+    #[OA\Post(
+        path:"/api/product",
+        summary: "Crée un produit",
+        tags: ["Product"],
+        requestBody: new OA\RequestBody(
+            description: "Crée un produit",
+            required: true,
+            content: new OA\JsonContent(
+                ref: new Model(type: Product::class)
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description:"Le produit a bien été créée",
+                content: new OA\JsonContent(
+                    type: "object",
+                    properties: [
+                        new OA\Property(property:"name", type:"string"),
+                    ])),
+                new OA\Response(
+                    response: 400,
+                    description: "La requête est incorrecte")
+        ]
+    )]
+    #[OA\Tag(name:"Product")]
         public function createProduct(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator): JsonResponse
         {
             $product = $serializer->deserialize($request->getContent(), Product::class,'json');
@@ -87,12 +105,55 @@ class ProductController extends AbstractController
         }
 
 
-    #[OA\Response(
-        response: 200,
-        description: "Updates a product",
+    
+    #[Route('/api/product/{id}', name: 'updateProduct', methods: ['PUT'])]
+    #[OA\Put(
+        path: "/api/product/{id}",
+        summary: "Met à jour d'un produit existant",
+        tags: ["Product"],
+        requestBody: new OA\RequestBody(
+            description: "Les informations du produit à mettre à jour",
+            required: true,
+            content: new OA\JsonContent(
+                ref: new Model(type: Product::class, groups: ["update"])
+            )
+        ),
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                in: "path",
+                description: "L'identifiant du produit à mettre à jour",
+                required: true,
+                schema: new OA\Schema(type: "integer")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 204,
+                description: "Produit mis à jour avec succès",
+                content: new OA\JsonContent(
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "name", type: "string"),
+                        new OA\Property(property:"actor", type:"string"),
+                        new OA\Property(property:"director", type:"string"),
+                        new OA\Property(property:"price", type:"decimal"),
+                        new OA\Property(property:"synopsis", type:"string"),
+                        new OA\Property(property:"duration", type:"time"),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Erreur de validation"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "produit non trouvé"
+            )
+        ]
     )]
     #[OA\Tag(name: 'Product')]
-    #[Route('/api/product/{id}', name: 'updateProduct', methods: ['PUT'])]
         public function updateProduct(Request $request, SerializerInterface $serializer, Product $currentProduct, EntityManagerInterface $em): JsonResponse
         {
             $updateProduct = $serializer->deserialize($request->getContent(), Product::class,'json',[AbstractNormalizer::OBJECT_TO_POPULATE => $currentProduct]);
